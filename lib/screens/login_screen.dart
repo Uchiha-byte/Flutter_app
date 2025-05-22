@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../constants/app_constants.dart';
+import '../models/user_model.dart';
+import '../models/user_manager.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -108,7 +110,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          // TODO: Implement login
+                          // TODO: Replace with real authentication and user fetch
+                          // For now, use mock user data
+                          final user = UserModel(
+                            name: 'John Doe',
+                            email: _emailController.text.trim(),
+                            dateOfBirth: '01/01/1990',
+                            onBehalf: 'Self',
+                          );
+                          UserManager().setUser(user);
                           Navigator.pushReplacementNamed(context, '/home');
                         }
                       },

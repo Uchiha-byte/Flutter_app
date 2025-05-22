@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../constants/app_constants.dart';
+import '../models/user_model.dart';
+import '../models/user_manager.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -15,6 +17,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _dateOfBirthController = TextEditingController();
+  final _onBehalfController = TextEditingController();
 
   @override
   void dispose() {
@@ -22,7 +26,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _dateOfBirthController.dispose();
+    _onBehalfController.dispose();
     super.dispose();
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _dateOfBirthController.text = "${picked.day}/${picked.month}/${picked.year}";
+      });
+    }
   }
 
   @override
@@ -49,16 +69,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 48),
                     // Logo
                     Center(
                       child: Image.asset(
                         AppConstants.logoPath,
-                        width: 100,
-                        height: 100,
+                        width: 120,
+                        height: 120,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
                     // Title
                     Text(
                       'Create Account',
@@ -69,7 +89,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Join our community',
+                      'Join us to find your perfect match',
                       style: AppTheme.subheadingStyle.copyWith(
                         color: AppTheme.textLightColor,
                       ),
@@ -103,8 +123,41 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your email';
                         }
-                        if (!value.contains('@')) {
-                          return 'Please enter a valid email';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    // Date of Birth Field
+                    TextFormField(
+                      controller: _dateOfBirthController,
+                      decoration: AppTheme.inputDecoration.copyWith(
+                        labelText: 'Date of Birth',
+                        prefixIcon: const Icon(Icons.calendar_today_outlined),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.calendar_month),
+                          onPressed: () => _selectDate(context),
+                        ),
+                      ),
+                      readOnly: true,
+                      onTap: () => _selectDate(context),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please select your date of birth';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    // On Behalf Field
+                    TextFormField(
+                      controller: _onBehalfController,
+                      decoration: AppTheme.inputDecoration.copyWith(
+                        labelText: 'On Behalf Of',
+                        prefixIcon: const Icon(Icons.people_outline),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please specify who you are registering for';
                         }
                         return null;
                       },
@@ -121,9 +174,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your password';
-                        }
-                        if (value.length < 6) {
-                          return 'Password must be at least 6 characters';
                         }
                         return null;
                       },
@@ -152,7 +202,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          // TODO: Implement registration
+                          final user = UserModel(
+                            name: _nameController.text.trim(),
+                            email: _emailController.text.trim(),
+                            dateOfBirth: _dateOfBirthController.text,
+                            onBehalf: _onBehalfController.text.trim(),
+                          );
+                          UserManager().setUser(user);
                           Navigator.pushReplacementNamed(context, '/home');
                         }
                       },

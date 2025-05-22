@@ -32,16 +32,27 @@ class HomeScreen extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        // Larger Logo
                         Image.asset(
                           AppConstants.logoPath,
-                          width: 40,
-                          height: 40,
+                          width: 120, // Increased size
+                          height: 120, // Increased size
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.notifications_outlined),
-                          onPressed: () {
-                            // TODO: Implement notifications
-                          },
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.notifications_outlined),
+                              onPressed: () {
+                                // TODO: Implement notifications
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.person_outline),
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/profile');
+                              },
+                            ),
+                          ],
                         ),
                       ],
                     ),

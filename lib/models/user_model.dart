@@ -1,43 +1,31 @@
 class UserModel {
-  final String uid;
+  final String name;
   final String email;
-  final String firstName;
-  final String lastName;
-  final String? gender;
-  final DateTime? dateOfBirth;
-  final String? onBehalf;
+  final String dateOfBirth;
+  final String onBehalf;
 
   UserModel({
-    required this.uid,
+    required this.name,
     required this.email,
-    required this.firstName,
-    required this.lastName,
-    this.gender,
-    this.dateOfBirth,
-    this.onBehalf,
+    required this.dateOfBirth,
+    required this.onBehalf,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'uid': uid,
+      'name': name,
       'email': email,
-      'firstName': firstName,
-      'lastName': lastName,
-      'gender': gender,
-      'dateOfBirth': dateOfBirth?.toIso8601String(),
+      'dateOfBirth': dateOfBirth,
       'onBehalf': onBehalf,
     };
   }
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      uid: map['uid'] ?? '',
+      name: map['name'] ?? '',
       email: map['email'] ?? '',
-      firstName: map['firstName'] ?? '',
-      lastName: map['lastName'] ?? '',
-      gender: map['gender'],
-      dateOfBirth: map['dateOfBirth'] != null ? DateTime.parse(map['dateOfBirth']) : null,
-      onBehalf: map['onBehalf'],
+      dateOfBirth: map['dateOfBirth'] ?? '',
+      onBehalf: map['onBehalf'] ?? '',
     );
   }
 } 

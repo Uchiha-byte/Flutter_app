@@ -1,12 +1,27 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../constants/app_constants.dart';
+import '../models/user_manager.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
   @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  @override
   Widget build(BuildContext context) {
+    final user = UserManager().currentUser;
+    if (user == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text('No user logged in'),
+        ),
+      );
+    }
+
     return Scaffold(
       body: Stack(
         children: [
@@ -69,14 +84,14 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'John Doe',
+                          user.name,
                           style: AppTheme.headingStyle.copyWith(
                             color: AppTheme.primaryColor,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'john.doe@example.com',
+                          user.email,
                           style: AppTheme.bodyStyle.copyWith(
                             color: AppTheme.textLightColor,
                           ),
@@ -95,17 +110,17 @@ class ProfileScreen extends StatelessWidget {
                         _buildInfoCard(
                           icon: Icons.person_outline,
                           title: 'Full Name',
-                          value: 'John Doe',
+                          value: user.name,
                         ),
                         _buildInfoCard(
                           icon: Icons.calendar_today_outlined,
                           title: 'Date of Birth',
-                          value: '01/01/1990',
+                          value: user.dateOfBirth,
                         ),
                         _buildInfoCard(
                           icon: Icons.people_outline,
                           title: 'On Behalf',
-                          value: 'Self',
+                          value: user.onBehalf,
                         ),
                         const SizedBox(height: 24),
                         _buildSectionTitle('Membership'),
@@ -122,6 +137,7 @@ class ProfileScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: ElevatedButton(
                       onPressed: () {
+                        UserManager().clearUser();
                         Navigator.pushReplacementNamed(context, '/login');
                       },
                       style: AppTheme.secondaryButtonStyle,
