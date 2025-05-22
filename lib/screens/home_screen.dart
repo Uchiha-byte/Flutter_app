@@ -65,6 +65,13 @@ class HomeScreen extends StatelessWidget {
                             color: AppTheme.primaryColor,
                           ),
                         ),
+                        const SizedBox(height: 8),
+                        Text(
+                          AppConstants.appDescription,
+                          style: AppTheme.bodyStyle.copyWith(
+                            color: AppTheme.textLightColor,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -127,35 +134,34 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFeatureCard(Map<String, String> feature) {
+  Widget _buildFeatureCard(String feature) {
+    IconData icon;
+    switch (feature) {
+      case 'Best Matches':
+        icon = Icons.favorite;
+        break;
+      case 'Verified Profiles':
+        icon = Icons.verified_user;
+        break;
+      case '100% Privacy':
+        icon = Icons.lock;
+        break;
+      default:
+        icon = Icons.star;
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: AppTheme.cardDecoration,
       child: Row(
         children: [
-          Image.asset(
-            'assets/images/${feature['icon']}',
-            width: 48,
-            height: 48,
-          ),
+          Icon(icon, color: AppTheme.primaryColor, size: 32),
           const SizedBox(width: 16),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  feature['title']!,
-                  style: AppTheme.subheadingStyle,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  feature['description']!,
-                  style: AppTheme.bodyStyle.copyWith(
-                    color: AppTheme.textLightColor,
-                  ),
-                ),
-              ],
+            child: Text(
+              feature,
+              style: AppTheme.subheadingStyle,
             ),
           ),
         ],
