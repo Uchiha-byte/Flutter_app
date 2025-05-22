@@ -1,222 +1,277 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../models/user_model.dart';
-import '../services/database_helper.dart';
-import '../services/session_manager.dart';
+import '../theme/app_theme.dart';
+import '../constants/app_constants.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
   @override
-  _ProfileScreenState createState() => _ProfileScreenState();
-}
-
-class _ProfileScreenState extends State<ProfileScreen> {
-  UserModel? _user;
-  final _sessionManager = SessionManager();
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _sessionManager.init();
-    _loadUserData();
-  }
-
-  Future<void> _loadUserData() async {
-    try {
-      final userId = await _sessionManager.getUserId();
-      if (userId != null) {
-        final user = await DatabaseHelper.instance.getUserById(userId);
-        if (mounted) {
-          setState(() {
-            _user = user;
-            _isLoading = false;
-          });
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading user data: ${e.toString()}')),
-        );
-      }
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_user == null) {
-      return const Center(child: Text('User not found'));
-    }
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Profile',
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.bold,
+      body: Stack(
+        children: [
+          // Background Image
+          Positioned.fill(
+            child: Opacity(
+              opacity: 0.1,
+              child: Image.asset(
+                AppConstants.backgroundImagePath,
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
-        ),
-        backgroundColor: Colors.green.shade800,
-        foregroundColor: Colors.white,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Profile Header
-            Center(
+          // Content
+          SafeArea(
+            child: SingleChildScrollView(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.green.shade100,
-                    child: Text(
-                      _user!.firstName[0].toUpperCase(),
-                      style: GoogleFonts.poppins(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green.shade800,
-                      ),
+                  // App Bar
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined),
+                          onPressed: () {
+                            // TODO: Implement edit profile
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '${_user!.firstName} ${_user!.lastName}',
-                    style: GoogleFonts.poppins(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                  // Profile Header
+                  Center(
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppTheme.primaryColor,
+                              width: 3,
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(60),
+                            child: Image.asset(
+                              AppConstants.logoPath,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'John Doe',
+                          style: AppTheme.headingStyle.copyWith(
+                            color: AppTheme.primaryColor,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'john.doe@example.com',
+                          style: AppTheme.bodyStyle.copyWith(
+                            color: AppTheme.textLightColor,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Text(
-                    _user!.email,
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: Colors.grey,
+                  const SizedBox(height: 32),
+                  // Profile Sections
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionTitle('Personal Information'),
+                        _buildInfoCard(
+                          icon: Icons.person_outline,
+                          title: 'Full Name',
+                          value: 'John Doe',
+                        ),
+                        _buildInfoCard(
+                          icon: Icons.calendar_today_outlined,
+                          title: 'Date of Birth',
+                          value: '01/01/1990',
+                        ),
+                        _buildInfoCard(
+                          icon: Icons.people_outline,
+                          title: 'On Behalf',
+                          value: 'Self',
+                        ),
+                        const SizedBox(height: 24),
+                        _buildSectionTitle('Membership'),
+                        _buildMembershipCard(),
+                        const SizedBox(height: 24),
+                        _buildSectionTitle('Settings'),
+                        _buildSettingsCard(),
+                      ],
                     ),
                   ),
+                  const SizedBox(height: 32),
+                  // Logout Button
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushReplacementNamed(context, '/login');
+                      },
+                      style: AppTheme.secondaryButtonStyle,
+                      child: const Text('Logout'),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
                 ],
               ),
-            ),
-            const SizedBox(height: 32),
-
-            // Personal Information
-            Text(
-              'Personal Information',
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildInfoCard([
-              _buildInfoRow('Gender', _user!.gender ?? 'Not specified'),
-              _buildInfoRow('Date of Birth', _user!.dateOfBirth?.toString() ?? 'Not specified'),
-              if (_user!.onBehalf != null)
-                _buildInfoRow('On Behalf', _user!.onBehalf!),
-            ]),
-            const SizedBox(height: 24),
-
-            // Account Settings
-            Text(
-              'Account Settings',
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildInfoCard([
-              ListTile(
-                leading: const Icon(Icons.edit),
-                title: const Text('Edit Profile'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  // TODO: Implement edit profile
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.lock),
-                title: const Text('Change Password'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  // TODO: Implement change password
-                },
-              ),
-            ]),
-            const SizedBox(height: 24),
-
-            // Logout Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () async {
-                  await _sessionManager.clearSession();
-                  if (mounted) {
-                    Navigator.pushReplacementNamed(context, '/login');
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Logout',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoCard(List<Widget> children) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: children,
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: GoogleFonts.poppins(
-              color: Colors.grey,
-            ),
-          ),
-          Text(
-            value,
-            style: GoogleFonts.poppins(
-              fontWeight: FontWeight.w500,
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Text(
+        title,
+        style: AppTheme.subheadingStyle,
+      ),
+    );
+  }
+
+  Widget _buildInfoCard({
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: AppTheme.cardDecoration,
+      child: Row(
+        children: [
+          Icon(icon, color: AppTheme.primaryColor),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppTheme.bodyStyle.copyWith(
+                    color: AppTheme.textLightColor,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: AppTheme.subheadingStyle,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMembershipCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: AppTheme.goldGradient,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.diamond_outlined, color: Colors.white),
+              const SizedBox(width: 8),
+              Text(
+                'Gold Membership',
+                style: AppTheme.subheadingStyle.copyWith(
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Valid until: 31/12/2024',
+            style: AppTheme.bodyStyle.copyWith(
+              color: Colors.white.withOpacity(0.8),
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              // TODO: Implement upgrade
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: AppTheme.primaryColor,
+            ),
+            child: const Text('Upgrade Plan'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingsCard() {
+    return Container(
+      decoration: AppTheme.cardDecoration,
+      child: Column(
+        children: [
+          _buildSettingTile(
+            icon: Icons.notifications_outlined,
+            title: 'Notifications',
+            onTap: () {
+              // TODO: Implement notifications settings
+            },
+          ),
+          const Divider(height: 1),
+          _buildSettingTile(
+            icon: Icons.lock_outline,
+            title: 'Privacy',
+            onTap: () {
+              // TODO: Implement privacy settings
+            },
+          ),
+          const Divider(height: 1),
+          _buildSettingTile(
+            icon: Icons.help_outline,
+            title: 'Help & Support',
+            onTap: () {
+              // TODO: Implement help & support
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingTile({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: AppTheme.primaryColor),
+      title: Text(title, style: AppTheme.bodyStyle),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: onTap,
     );
   }
 } 

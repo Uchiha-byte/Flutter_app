@@ -40,18 +40,42 @@ class DatabaseHelper {
     ''');
   }
 
+  // Check if email exists
+  Future<bool> isEmailExists(String email) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: 'email = ?',
+      whereArgs: [email],
+    );
+    return maps.isNotEmpty;
+  }
+
   // Insert user
   Future<int> insertUser(UserModel user, String password) async {
     final db = await database;
-    return await db.insert('users', {
-      'email': user.email,
-      'password': password, // In a real app, you should hash the password
-      'firstName': user.firstName,
-      'lastName': user.lastName,
-      'gender': user.gender,
-      'dateOfBirth': user.dateOfBirth?.toIso8601String(),
-      'onBehalf': user.onBehalf,
-    });
+    
+    // Check if email already exists
+    if (await isEmailExists(user.email)) {
+      throw Exception('Email already exists');
+    }
+    
+    try {
+      return await db.insert('users', {
+        'email': user.email,
+        'password': password, // In a real app, you should hash the password
+        'firstName': user.firstName,
+        'lastName': user.lastName,
+        'gender': user.gender,
+        'dateOfBirth': user.dateOfBirth?.toIso8601String(),
+        'onBehalf': user.onBehalf,
+      });
+    } catch (e) {
+      if (e.toString().contains('UNIQUE constraint failed')) {
+        throw Exception('Email already exists');
+      }
+      rethrow;
+    }
   }
 
   // Get user by email and password
